@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INT 7623 | Raisin K-NN Project Results</title>
+  <style>
+    :root {
+      --bg: #f3eadf;
+      --paper: rgba(255, 250, 244, 0.88);
+      --paper-strong: rgba(255, 248, 239, 0.96);
+      --ink: #2d1f1a;
+      --muted: #6c564c;
+      --accent: #8b3a3a;
+      --accent-deep: #59242d;
+      --gold: #d8a657;
+      --line: rgba(89, 36, 45, 0.14);
+      --shadow: 0 20px 50px rgba(67, 38, 28, 0.12);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(216, 166, 87, 0.20), transparent 28%),
+        radial-gradient(circle at top right, rgba(139, 58, 58, 0.16), transparent 32%),
+        linear-gradient(180deg, #f7efe7 0%, #efe2d3 100%);
+    }
+
+    .texture {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image:
+        linear-gradient(rgba(89, 36, 45, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(89, 36, 45, 0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 24px auto 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      padding: 42px;
+      border-radius: 30px;
+      background:
+        linear-gradient(135deg, rgba(89, 36, 45, 0.96), rgba(139, 58, 58, 0.92)),
+        linear-gradient(135deg, rgba(216, 166, 87, 0.22), transparent);
+      color: #fff8f0;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -40px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 230, 188, 0.28), transparent 66%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      opacity: 0.86;
+      margin-bottom: 14px;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 14px;
+      line-height: 1.12;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      max-width: 12ch;
+    }
+
+    .hero p {
+      max-width: 760px;
+      color: rgba(255, 248, 240, 0.92);
+      font-size: 1.04rem;
+      line-height: 1.7;
+    }
+
+    .hero-grid,
+    .stats-grid,
+    .gallery,
+    .matrix-grid,
+    .insights-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-top: 26px;
+    }
+
+    .chip,
+    .card,
+    .metric,
+    .panel {
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .chip {
+      background: rgba(255, 248, 240, 0.12);
+      border: 1px solid rgba(255, 248, 240, 0.16);
+      padding: 16px 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .chip strong {
+      display: block;
+      font-size: 1.55rem;
+      margin-bottom: 6px;
+    }
+
+    section {
+      margin-top: 22px;
+    }
+
+    .section-shell {
+      background: var(--paper);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 28px;
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-title p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 620px;
+      line-height: 1.6;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin-top: 18px;
+    }
+
+    .metric {
+      background: var(--paper-strong);
+      border: 1px solid rgba(216, 166, 87, 0.2);
+      padding: 18px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-size: 1.65rem;
+      color: var(--accent-deep);
+      font-weight: 700;
+    }
+
+    .metric small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      margin-top: 18px;
+    }
+
+    .panel {
+      background: var(--paper-strong);
+      border: 1px solid rgba(89, 36, 45, 0.1);
+      padding: 20px;
+    }
+
+    p, li {
+      line-height: 1.72;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.52);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(89, 36, 45, 0.08);
+    }
+
+    th {
+      background: rgba(139, 58, 58, 0.08);
+      color: var(--accent-deep);
+      font-size: 0.95rem;
+    }
+
+    .best-row {
+      background: rgba(216, 166, 87, 0.13);
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 5px solid var(--gold);
+      background: rgba(216, 166, 87, 0.12);
+      border-radius: 16px;
+    }
+
+    .gallery,
+    .matrix-grid,
+    .insights-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-top: 18px;
+    }
+
+    figure {
+      margin: 0;
+      background: var(--paper-strong);
+      border-radius: 22px;
+      padding: 16px;
+      border: 1px solid rgba(89, 36, 45, 0.09);
+      box-shadow: var(--shadow);
+    }
+
+    figure img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      border: 1px solid rgba(89, 36, 45, 0.08);
+      background: white;
+    }
+
+    figcaption {
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .insight-box {
+      background: linear-gradient(180deg, rgba(255, 251, 246, 0.95), rgba(255, 246, 235, 0.95));
+      border: 1px solid rgba(216, 166, 87, 0.16);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .insight-box h3 {
+      color: var(--accent-deep);
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .section-shell {
+        padding: 22px;
+      }
+
+      .section-title {
+        flex-direction: column;
+        align-items: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="texture"></div>
+  <main class="page">
+    <header class="hero">
+      <div class="eyebrow">INT 7623 Final Project</div>
+      <h1>Raisin Variety Classification with K-Nearest Neighbors</h1>
+      <p>
+        This project predicts whether a raisin belongs to the <strong>Besni</strong> or
+        <strong>Kecimen</strong> class using seven morphological measurements. The final
+        result is a clean binary classification workflow built in Python, evaluated across
+        multiple K values, and presented with visual and numerical evidence.
+      </p>
+      <div class="hero-grid">
+        <div class="chip">
+          <strong>900</strong>
+          Dataset rows
+        </div>
+        <div class="chip">
+          <strong>7</strong>
+          Numerical features
+        </div>
+        <div class="chip">
+          <strong>2</strong>
+          Balanced classes
+        </div>
+        <div class="chip">
+          <strong>K = 5</strong>
+          Best overall model
+        </div>
+      </div>
+    </header>
+
+    <section class="section-shell">
+      <div class="section-title">
+        <div>
+          <h2>Project Summary</h2>
+          <p>The UCI Raisin dataset is a strong fit for this assignment because it is real, balanced, numeric, and sized correctly for K-NN classification.</p>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="metric">
+          <div class="label">Records</div>
+          <div class="value">900</div>
+          <small>Enough observations to train and test a meaningful classifier.</small>
+        </div>
+        <div class="metric">
+          <div class="label">Features</div>
+          <div class="value">7</div>
+          <small>Exactly within the assignment range of 6 to 10 measurements.</small>
+        </div>
+        <div class="metric">
+          <div class="label">Classes</div>
+          <div class="value">2</div>
+          <small>450 Besni and 450 Kecimen, which keeps the learning task balanced.</small>
+        </div>
+        <div class="metric">
+          <div class="label">Best Test Accuracy</div>
+          <div class="value">86.11%</div>
+          <small>Achieved by K = 5 with a more stable train-test gap than K = 3.</small>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <article class="panel">
+          <h3>What the Model Builds</h3>
+          <p>
+            The model takes physical raisin measurements such as area, perimeter, and axis
+            lengths, then predicts the raisin variety. Because the input features are numeric,
+            K-NN can compare new raisins to previously labeled examples by distance after
+            standardization.
+          </p>
+          <p>
+            This kind of classifier is useful in agriculture and food processing because it can
+            support automated sorting, quality control, and variety identification with more
+            consistency than manual visual checking alone.
+          </p>
+        </article>
+        <article class="panel">
+          <h3>Why This Dataset Fits</h3>
+          <ul>
+            <li>It is a real-world labeled dataset from the UCI repository.</li>
+            <li>It has more than 500 records and exactly 7 numerical features.</li>
+            <li>It uses two classes, which matches the binary classification requirement.</li>
+            <li>Its features are meaningful and interpretable, so the report is easier to explain.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-title">
+        <div>
+          <h2>Data Preparation and Split</h2>
+          <p>The preprocessing was intentionally simple and correct for K-NN: validate the data, preserve all useful morphology features, and standardize the scale.</p>
+        </div>
+      </div>
+      <div class="insights-grid">
+        <div class="insight-box">
+          <h3>Missing Values</h3>
+          <p>The dataset contained <strong>0 missing values</strong>, so no imputation step was required.</p>
+        </div>
+        <div class="insight-box">
+          <h3>Duplicate Rows</h3>
+          <p>The dataset contained <strong>0 duplicate rows</strong>, which means no duplicate-cleaning step was needed.</p>
+        </div>
+        <div class="insight-box">
+          <h3>Scaling</h3>
+          <p>All predictors were standardized because K-NN depends on distance. Without scaling, larger-magnitude variables would dominate the model.</p>
+        </div>
+        <div class="insight-box">
+          <h3>Train/Test Split</h3>
+          <p>The data was split using stratified sampling into <strong>720 training rows</strong> and <strong>180 testing rows</strong>.</p>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Split</th>
+            <th>Rows</th>
+            <th>Besni</th>
+            <th>Kecimen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Training</td>
+            <td>720</td>
+            <td>360</td>
+            <td>360</td>
+          </tr>
+          <tr>
+            <td>Testing</td>
+            <td>180</td>
+            <td>90</td>
+            <td>90</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-title">
+        <div>
+          <h2>Model Comparison</h2>
+          <p>Three odd K values were selected to compare a more flexible classifier against smoother ones while avoiding vote ties.</p>
+        </div>
+      </div>
+
+      <div class="insights-grid">
+        <div class="insight-box">
+          <h3>K = 3</h3>
+          <p>A smaller neighborhood that can learn local structure strongly, but it is more likely to react to noise.</p>
+        </div>
+        <div class="insight-box">
+          <h3>K = 5</h3>
+          <p>A balanced middle option that keeps strong accuracy while reducing overfitting compared with K = 3.</p>
+        </div>
+        <div class="insight-box">
+          <h3>K = 9</h3>
+          <p>A smoother model that lowers sensitivity to noise, but in this case it also slightly lowers test accuracy.</p>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>K</th>
+            <th>Training Accuracy</th>
+            <th>Testing Accuracy</th>
+            <th>Precision (Kecimen)</th>
+            <th>Recall (Kecimen)</th>
+            <th>Misclassification Error</th>
+            <th>Generalization Gap</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>3</td>
+            <td>0.9181</td>
+            <td>0.8611</td>
+            <td>0.8155</td>
+            <td>0.9333</td>
+            <td>0.1389</td>
+            <td>0.0569</td>
+          </tr>
+          <tr class="best-row">
+            <td>5</td>
+            <td>0.8903</td>
+            <td>0.8611</td>
+            <td>0.8095</td>
+            <td>0.9444</td>
+            <td>0.1389</td>
+            <td>0.0292</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>0.8778</td>
+            <td>0.8556</td>
+            <td>0.8019</td>
+            <td>0.9444</td>
+            <td>0.1444</td>
+            <td>0.0222</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>Best model decision:</strong> K = 5 was selected as the final model because it tied for the best test accuracy while showing a much smaller train-test gap than K = 3. That makes it the strongest balance between accuracy and generalization.
+      </div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-title">
+        <div>
+          <h2>Visual Results</h2>
+          <p>These charts support the report by showing class balance, feature relationships, overall structure, and the final classification behavior.</p>
+        </div>
+      </div>
+      <div class="gallery">
+        <figure>
+          <img src="../outputs/figures/class_distribution.png" alt="Class distribution chart">
+          <figcaption>The target classes are perfectly balanced, which is ideal for a fair binary classification task.</figcaption>
+        </figure>
+        <figure>
+          <img src="../outputs/figures/area_vs_perimeter.png" alt="Area versus perimeter scatter plot">
+          <figcaption>Area and perimeter show partial separation between the classes, which suggests useful predictive structure.</figcaption>
+        </figure>
+        <figure>
+          <img src="../outputs/figures/correlation_heatmap.png" alt="Feature correlation heatmap">
+          <figcaption>The strongest positive relationships appear among size-based features such as Area, ConvexArea, MajorAxisLength, and Perimeter.</figcaption>
+        </figure>
+        <figure>
+          <img src="../outputs/figures/feature_boxplots.png" alt="Feature boxplots by class">
+          <figcaption>The boxplots show meaningful differences between classes, but also some overlap, which makes the task realistic.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-title">
+        <div>
+          <h2>Confusion Matrices</h2>
+          <p>The confusion matrices show exactly where each K value succeeds and where it makes mistakes.</p>
+        </div>
+      </div>
+      <div class="matrix-grid">
+        <figure>
+          <img src="../outputs/figures/confusion_matrix_k3.png" alt="Confusion matrix for K equals 3">
+          <figcaption>K = 3 correctly predicted 71 Besni and 84 Kecimen, but it misclassified 19 Besni and 6 Kecimen.</figcaption>
+        </figure>
+        <figure>
+          <img src="../outputs/figures/confusion_matrix_k5.png" alt="Confusion matrix for K equals 5">
+          <figcaption>K = 5 correctly predicted 70 Besni and 85 Kecimen, while misclassifying 20 Besni and 5 Kecimen.</figcaption>
+        </figure>
+        <figure>
+          <img src="../outputs/figures/confusion_matrix_k9.png" alt="Confusion matrix for K equals 9">
+          <figcaption>K = 9 correctly predicted 69 Besni and 85 Kecimen, while misclassifying 21 Besni and 5 Kecimen.</figcaption>
+        </figure>
+      </div>
+
+      <div class="two-col">
+        <article class="panel">
+          <h3>What the Errors Mean</h3>
+          <p>
+            Across all three models, the most common error is predicting some Besni raisins as
+            Kecimen. This suggests that the Kecimen region in feature space may slightly absorb
+            borderline Besni examples when their morphology is similar.
+          </p>
+        </article>
+        <article class="panel">
+          <h3>Why K = 5 Wins</h3>
+          <p>
+            K = 5 keeps the same best test accuracy as K = 3, improves recall for Kecimen, and
+            lowers the train-test gap substantially. That is why it is a better final choice for
+            unseen data.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-title">
+        <div>
+          <h2>Conclusion and Next Steps</h2>
+          <p>This project successfully demonstrates the full machine learning workflow requested in the assignment and produces credible, explainable results.</p>
+        </div>
+      </div>
+      <div class="two-col">
+        <article class="panel">
+          <h3>Final Conclusion</h3>
+          <p>
+            The UCI Raisin dataset is an excellent match for K-NN classification because it is
+            balanced, numeric, and based on real physical measurements. The final model, K = 5,
+            achieved <strong>86.11% testing accuracy</strong> with a good balance between
+            predictive performance and generalization.
+          </p>
+        </article>
+        <article class="panel">
+          <h3>Possible Improvements</h3>
+          <ul>
+            <li>Try more K values with cross-validation.</li>
+            <li>Test distance-weighted K-NN.</li>
+            <li>Compare K-NN with logistic regression, decision trees, or SVM.</li>
+            <li>Explore PCA or feature selection for dimensional refinement.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

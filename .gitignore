@@ -1,0 +1,9 @@
+.DS_Store
+.mplconfig/
+__pycache__/
+*.pyc
+.Rhistory
+
+INT7623_raisin_knn_project.zip
+raisin.zip
+submission_package/

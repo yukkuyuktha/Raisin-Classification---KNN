@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APA Report | Raisin Classification</title>
+  <style>
+    body {
+      margin: 0;
+      background: #e9e4dd;
+      color: #111;
+      font-family: "Times New Roman", Times, serif;
+    }
+
+    .page {
+      width: min(8.5in, calc(100% - 32px));
+      margin: 24px auto;
+      background: #fff;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+      padding: 1in;
+      line-height: 2;
+      font-size: 12pt;
+    }
+
+    .running-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11pt;
+      margin-bottom: 48px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .title-page {
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      margin: 24px 0 12px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 12pt;
+    }
+
+    h2, h3 {
+      font-size: 12pt;
+    }
+
+    p {
+      margin: 0 0 16px;
+      text-indent: 0.5in;
+      text-align: justify;
+    }
+
+    .no-indent {
+      text-indent: 0;
+    }
+
+    .center {
+      text-align: center;
+      text-indent: 0;
+    }
+
+    .abstract-label,
+    .keywords {
+      text-indent: 0;
+    }
+
+    .keywords em {
+      font-style: italic;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0 24px;
+      font-size: 11.5pt;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f5f5f5;
+    }
+
+    ul {
+      margin: 0 0 16px 1.2in;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .references p {
+      padding-left: 0.5in;
+      text-indent: -0.5in;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="running-head">
+      <span>Raisin Classification with K-NN</span>
+      <span>1</span>
+    </div>
+
+    <section class="title-page">
+      <h1>Binary Classification of Raisin Varieties Using K-Nearest Neighbors</h1>
+      <p class="center">Student Name</p>
+      <p class="center">INT 7623 Data Science for Business</p>
+      <p class="center">Instructor Name</p>
+      <p class="center">May 7, 2026</p>
+    </section>
+
+    <h2>Abstract</h2>
+    <p class="abstract-label no-indent">
+      This project examined whether morphological measurements can be used to classify raisins into the Besni and Kecimen varieties with the K-Nearest Neighbors (K-NN) algorithm. The study used the UCI Raisin dataset, which contains 900 observations, seven numerical predictor variables, and two balanced class labels. After loading and inspecting the data, the dataset was checked for missing values and duplicate rows, then standardized because K-NN is sensitive to feature scale. The data were partitioned into stratified training and testing sets using an 80/20 split. Three K values, 3, 5, and 9, were tested and compared using training accuracy, testing accuracy, precision, recall, misclassification error, and confusion matrices. The findings showed that K = 3 and K = 5 achieved the highest testing accuracy at 0.8611, while K = 5 produced a smaller generalization gap and stronger recall for the Kecimen class. The final analysis indicates that K = 5 provides the best overall balance between predictive accuracy and model stability. This project demonstrates that raisin morphology can be used effectively for binary classification and that careful preprocessing improves the quality of distance-based machine learning models.
+    </p>
+    <p class="keywords no-indent"><em>Keywords:</em> machine learning, K-nearest neighbors, binary classification, raisin dataset, data science</p>
+
+    <h2>Binary Classification of Raisin Varieties Using K-Nearest Neighbors</h2>
+
+    <h3>Introduction</h3>
+    <p>Machine learning classification models are useful when the goal is to assign observations into known categories using measurable attributes. In agricultural and food-processing applications, classification models can support automated inspection, product sorting, and quality control. This project focuses on classifying raisins into one of two varieties, Besni or Kecimen, based on their morphological measurements. Because the class labels are already known, this is a supervised learning problem.</p>
+    <p>The K-Nearest Neighbors algorithm was selected for this project because it is a straightforward and interpretable classification method for numerical data. K-NN predicts the class of a new observation by comparing it to nearby observations in the training set and assigning the majority class among the nearest neighbors. This approach is especially appropriate when observations with similar measurements are expected to belong to the same category.</p>
+    <p>This project also aligns strongly with the course requirements. The selected dataset is a real-world labeled dataset, includes more than 500 observations, contains between 6 and 10 measurements, and supports a two-class classification task. The goal of the study was to determine whether raisin morphology can be used to build an accurate classification model and to identify which K value provides the best predictive performance.</p>
+
+    <h3>Dataset Description</h3>
+    <p>The dataset used in this project was the UCI Raisin dataset (Cinar et al., 2020). It contains 900 observations with two balanced target classes: 450 Besni raisins and 450 Kecimen raisins. Each observation includes seven numerical predictor variables and one class label. The seven predictors are Area, MajorAxisLength, MinorAxisLength, Eccentricity, ConvexArea, Extent, and Perimeter. These variables describe the size and shape of each raisin and provide meaningful information for distinguishing between the two varieties.</p>
+    <p>The dataset is well suited for K-NN because all predictors are numerical and represent measurable physical properties. In addition, the balanced target classes reduce the risk that the classifier will become biased toward one label simply because that class appears more often in the training data.</p>
+
+    <h3>Method</h3>
+    <p>The raw dataset was loaded into Python from the ARFF file format and converted into a pandas DataFrame for analysis. The seven predictor variables were converted into numeric format, while the class label remained categorical. Initial inspection showed that the dataset contained 900 rows and 8 columns in total, including the target variable. The dataset was checked for data quality issues, and no missing values or duplicate rows were found.</p>
+    <p>Several visualizations were used to explore the structure of the data before training the model. A class distribution chart confirmed that the dataset was perfectly balanced. A scatter plot of Area versus Perimeter showed partial separation between the Besni and Kecimen classes. A correlation heatmap showed strong positive relationships among size-based variables such as Area, ConvexArea, MajorAxisLength, and Perimeter. Feature boxplots also showed meaningful overlap and separation between the classes.</p>
+    <p>Standardization was a necessary preprocessing step because K-NN is a distance-based algorithm. Without scaling, variables with larger numeric ranges would dominate variables with smaller numeric ranges. Therefore, all predictor variables were standardized using StandardScaler before model training. After preprocessing, the data were split into training and testing sets using an 80/20 ratio with stratified sampling and a random state of 42. The training set contained 720 observations and the testing set contained 180 observations, with balanced class representation in both subsets.</p>
+    <p>Three odd K values were selected for comparison: K = 3, K = 5, and K = 9. Odd values were chosen to reduce the chance of tied votes. K = 3 represented a more flexible model, K = 5 represented a balanced middle-ground model, and K = 9 represented a smoother model with stronger resistance to noise. Each model was trained on the same standardized training data and evaluated using the same testing set.</p>
+
+    <h3>Results</h3>
+    <p>Training accuracy results were 0.9181 for K = 3, 0.8903 for K = 5, and 0.8778 for K = 9. Testing accuracy results were 0.8611 for K = 3, 0.8611 for K = 5, and 0.8556 for K = 9. Although K = 3 and K = 5 tied for the highest testing accuracy, K = 5 had a smaller generalization gap and therefore showed better balance between fitting the training data and performing on unseen observations.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>K</th>
+          <th>Training Accuracy</th>
+          <th>Testing Accuracy</th>
+          <th>Precision</th>
+          <th>Recall</th>
+          <th>Misclassification Error</th>
+          <th>Generalization Gap</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>3</td>
+          <td>0.9181</td>
+          <td>0.8611</td>
+          <td>0.8155</td>
+          <td>0.9333</td>
+          <td>0.1389</td>
+          <td>0.0569</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>0.8903</td>
+          <td>0.8611</td>
+          <td>0.8095</td>
+          <td>0.9444</td>
+          <td>0.1389</td>
+          <td>0.0292</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>0.8778</td>
+          <td>0.8556</td>
+          <td>0.8019</td>
+          <td>0.9444</td>
+          <td>0.1444</td>
+          <td>0.0222</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Confusion matrices provided additional insight into model behavior. For K = 3, 71 Besni raisins and 84 Kecimen raisins were classified correctly, while 19 Besni and 6 Kecimen raisins were misclassified. For K = 5, 70 Besni raisins and 85 Kecimen raisins were classified correctly, while 20 Besni and 5 Kecimen raisins were misclassified. For K = 9, 69 Besni raisins and 85 Kecimen raisins were classified correctly, while 21 Besni and 5 Kecimen raisins were misclassified.</p>
+    <p>Overall, the results indicate that raisin morphology can support accurate binary classification. The models were particularly strong at identifying Kecimen raisins, as shown by high recall values. The main classification challenge involved some Besni raisins being predicted as Kecimen.</p>
+
+    <h3>Discussion</h3>
+    <p>K = 5 was selected as the best model because it tied for the highest testing accuracy, achieved strong recall, and produced a much smaller train-test gap than K = 3. Although K = 9 had the smallest generalization gap, it also had the lowest testing accuracy among the three tested models. These findings illustrate the typical tradeoff in K-NN between flexibility and stability. Smaller K values often fit local structure more aggressively, while moderate K values may generalize better.</p>
+    <p>This project demonstrates a complete and credible machine learning workflow using a real-world dataset. The study included data loading, exploratory analysis, preprocessing, model training, testing, and metric-based evaluation. One limitation is that only three K values were tested. Future work could apply cross-validation, test distance-weighted K-NN, or compare K-NN with other classifiers such as logistic regression, decision trees, support vector machines, or random forests.</p>
+
+    <h3>Conclusion</h3>
+    <p>This project successfully applied the K-Nearest Neighbors algorithm to classify raisins into the Besni and Kecimen varieties using seven morphological measurements. The UCI Raisin dataset was an excellent fit for the assignment because it is real, balanced, and appropriately structured for distance-based machine learning. Standardization improved the fairness of the distance calculations, and the final results showed that the dataset can be classified with solid predictive performance.</p>
+    <p>Among the tested models, K = 5 was the strongest overall option because it combined high testing accuracy with better generalization than K = 3. The findings support the conclusion that machine learning can be used effectively for raisin variety classification and that careful preprocessing and model comparison improve final project quality.</p>
+
+    <h3>References</h3>
+    <div class="references">
+      <p>Cinar, I., Koklu, M., &amp; Tasdemir, S. (2020). Classification of raisin grains using machine vision and artificial intelligence methods. <em>Gazi Journal of Engineering Sciences, 6</em>(3), 200-209. https://doi.org/10.30855/gmbd.2020.03.03</p>
+    </div>
+  </main>
+</body>
+</html>
